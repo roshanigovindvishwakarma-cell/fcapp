@@ -1,0 +1,112 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary: #059669;
+  --primary-light: #ecfdf5;
+  --secondary: #6366f1;
+  --surface: #ffffff;
+  --background: #f8fafc;
+  --text: #0f172a;
+  --text-muted: #64748b;
+  --radius: 1.25rem;
+}
+
+@layer base {
+  body {
+    @apply bg-slate-50 text-slate-900 antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+}
+
+.glass {
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
+}
+
+.glass-dark {
+  background: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.chat-bubble-sender {
+  @apply relative;
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  color: white;
+  border-radius: 1.25rem 1.25rem 0.25rem 1.25rem;
+}
+
+.chat-bubble-receiver {
+  @apply relative bg-white border border-slate-100;
+  color: #1e293b;
+  border-radius: 1.25rem 1.25rem 1.25rem 0.25rem;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #e2e8f0;
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #cbd5e1;
+}
+
+/* Animations */
+@keyframes message-in {
+  from { opacity: 0; transform: translateY(10px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.animate-message {
+  animation: message-in 0.3s cubic-bezier(0.2, 0, 0.2, 1) forwards;
+}
+
+.atrium-mesh {
+  background-color: #f8fafc;
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(5, 150, 105, 0.05) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(99, 102, 241, 0.05) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(5, 150, 105, 0.05) 0px, transparent 50%),
+    radial-gradient(at 0% 100%, rgba(99, 102, 241, 0.05) 0px, transparent 50%);
+}
+
+.btn-hover-effect {
+  @apply transition-all duration-300 active:scale-[0.97] hover:brightness-110;
+}
+
+.avatar-shadow {
+  box-shadow: 0 4px 20px -5px rgba(5, 150, 105, 0.3);
+}
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.loading-skeleton {
+  @apply bg-slate-100 animate-pulse-soft rounded-lg;
+  animation: pulse-soft 2s infinite ease-in-out;
+}
+
+@keyframes ring-glow {
+  0% { box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(5, 150, 105, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(5, 150, 105, 0); }
+}
+
+.status-online-glow {
+  animation: ring-glow 2s infinite;
+}
