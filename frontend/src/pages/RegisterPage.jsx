@@ -20,7 +20,14 @@ const RegisterPage = ({ onLogin }) => {
             const res = await axios.post('/api/auth/register', { name, email, password });
             onLogin(res.data);
         } catch (err) {
-            setError(err.response?.data?.message || 'Registration failed');
+            console.error("Registration error:", err);
+            if (err.response) {
+                setError(err.response.data.message || 'Registration failed');
+            } else if (err.request) {
+                setError('Cannot connect to server. Please try again.');
+            } else {
+                setError('An unexpected error occurred.');
+            }
         } finally {
             setLoading(false);
         }

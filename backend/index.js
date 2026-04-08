@@ -22,7 +22,7 @@ const io = new Server(server, {
 });
 
 app.use(cors({
-    origin: process.env.CLIENT_URL || "*",
+    origin: ["https://fcapp-tawny.vercel.app", "http://localhost:5173", "*"],
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true
 }));
