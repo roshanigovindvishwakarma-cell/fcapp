@@ -24,28 +24,32 @@ const ChatPage = ({ user, onLogout }) => {
     const scrollRef = useRef(null);
     const fileInputRef = useRef(null);
 
+    // Safety guard
+    if (!user || !user.token) return null;
+
     useEffect(() => {
+        if (!user?.token) return;
         const fetchUsers = async () => {
             try {
                 const res = await axios.get('/api/users', {
                     headers: { Authorization: `Bearer ${user.token}` }
                 });
-                setUsers(res.data);
+                setUsers(Array.isArray(res.data) ? res.data : []);
             } catch (err) {
                 console.error(err);
             }
         };
         fetchUsers();
-    }, [user.token]);
+    }, [user?.token]);
 
     useEffect(() => {
-        if (selectedUser) {
+        if (selectedUser && user?.token) {
             const fetchMessages = async () => {
                 try {
                     const res = await axios.get(`/api/messages/${selectedUser._id}`, {
                         headers: { Authorization: `Bearer ${user.token}` }
                     });
-                    setMessages(res.data);
+                    setMessages(Array.isArray(res.data) ? res.data : []);
                     
                     // Mark messages as read when opening chat
                     await axios.put(`/api/messages/mark-read/${selectedUser._id}`, {}, {
@@ -195,27 +199,27 @@ const ChatPage = ({ user, onLogout }) => {
         }
     };
 
-    const filteredUsers = users.filter(u => 
-        u.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-        u.email.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const filteredUsers = Array.isArray(users) ? users.filter(u => 
+        (u?.name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+         u?.email?.toLowerCase().includes(searchQuery.toLowerCase()))
+    ) : [];
 
     return (
         <div className="flex h-screen atrium-mesh overflow-hidden relative">
             {/* Sidebar */}
             <div className={twMerge(
-                "w-full md:max-w-[400px] border-r border-gray-100 flex flex-col bg-white shadow-sm z-30 transition-all duration-300 absolute md:relative h-full",
+                "w-full md:max-w-[400px] border-r border-gray-100 dark:border-slate-800 flex flex-col bg-white dark:bg-slate-900 shadow-sm z-30 transition-all duration-300 absolute md:relative h-full",
                 isSidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
             )}>
                 <div className="p-6 space-y-6">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <div className="bg-[#059669] p-2 rounded-xl shadow-lg shadow-emerald-100">
+                            <div className="bg-[#059669] p-2 rounded-xl shadow-lg shadow-emerald-100 dark:shadow-emerald-900/20">
                                 <MessageSquare className="w-6 h-6 text-white" />
                             </div>
-                            <h2 className="text-xl font-bold text-gray-900">Conversations</h2>
+                            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Conversations</h2>
                         </div>
-                        <button onClick={onLogout} className="p-2.5 rounded-xl bg-gray-50 text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all">
+                        <button onClick={onLogout} className="p-2.5 rounded-xl bg-gray-50 dark:bg-slate-800 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all">
                             <LogOut className="w-5 h-5" />
                         </button>
                     </div>
@@ -224,7 +228,7 @@ const ChatPage = ({ user, onLogout }) => {
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-primary transition-colors" />
                         <input 
                             type="text" 
-                            className="w-full pl-11 pr-4 py-3.5 bg-gray-50 border-none rounded-2xl focus:ring-4 focus:ring-emerald-50 transition-all outline-none text-sm font-medium"
+                            className="w-full pl-11 pr-4 py-3.5 bg-gray-50 dark:bg-slate-800 border-none rounded-2xl focus:ring-4 focus:ring-emerald-50 dark:focus:ring-emerald-500/10 transition-all outline-none text-sm font-medium dark:text-white dark:placeholder:text-slate-500"
                             placeholder="Search people..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
@@ -241,8 +245,8 @@ const ChatPage = ({ user, onLogout }) => {
                                 if (window.innerWidth < 768) setIsSidebarOpen(false);
                             }}
                             className={twMerge(
-                                "w-full p-4 flex items-center gap-4 rounded-[20px] transition-all group relative",
-                                selectedUser?._id === u._id ? "bg-emerald-50/70 shadow-sm" : "hover:bg-gray-50"
+                                "w-full p-4 flex items-center gap-4 rounded-[20px] transition-all group relative text-left",
+                                selectedUser?._id === u?._id ? "bg-emerald-50/70 dark:bg-emerald-900/20 shadow-sm" : "hover:bg-gray-50 dark:hover:bg-slate-800/50"
                             )}
                         >
                             <div className="relative">
@@ -253,7 +257,7 @@ const ChatPage = ({ user, onLogout }) => {
                             </div>
                             <div className="flex-1 text-left">
                                 <div className="flex justify-between items-center mb-0.5">
-                                    <h3 className="font-bold text-gray-900 group-hover:text-emerald-700 transition-colors line-clamp-1">{u.name}</h3>
+                                    <h3 className="font-bold text-gray-900 dark:text-white group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors line-clamp-1">{u.name}</h3>
                                     {u.lastMessage && (
                                         <span className="text-[10px] font-bold text-gray-300">
                                             {new Date(u.lastMessage.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -286,23 +290,23 @@ const ChatPage = ({ user, onLogout }) => {
                     ))}
                 </div>
 
-                <div className="p-4 border-t border-gray-50 bg-gray-50/20">
-                    <div className="flex items-center gap-3 p-3 bg-white rounded-2xl shadow-sm border border-gray-100">
+                <div className="p-4 border-t border-gray-50 dark:border-slate-800 bg-gray-50/20 dark:bg-slate-900/20">
+                    <div className="flex items-center gap-3 p-3 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700">
                         <img src={`https://i.pravatar.cc/100?u=${user._id}`} className="w-10 h-10 rounded-xl" alt={user.name} />
-                        <div className="flex-1">
-                            <p className="text-xs font-bold text-gray-900 leading-none">{user.name}</p>
-                            <p className="text-[10px] font-medium text-emerald-600 mt-1 uppercase tracking-wider">Online Profile</p>
+                        <div className="flex-1 text-left">
+                            <p className="text-xs font-bold text-gray-900 dark:text-white leading-none">{user.name}</p>
+                            <p className="text-[10px] font-medium text-emerald-600 dark:text-emerald-400 mt-1 uppercase tracking-wider">Online Profile</p>
                         </div>
                     </div>
                 </div>
             </div>
 
             {/* Chat Window */}
-            <div className="flex-1 flex flex-col bg-white relative h-full">
+            <div className="flex-1 flex flex-col bg-white dark:bg-slate-950 relative h-full">
                 {selectedUser ? (
                     <>
                         {/* Chat Header */}
-                        <div className="p-4 md:p-5 border-b border-gray-50 flex items-center justify-between z-10 bg-white/80 backdrop-blur-md">
+                        <div className="p-4 md:p-5 border-b border-gray-50 dark:border-slate-800 flex items-center justify-between z-10 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md">
                             <div className="flex items-center gap-3 md:gap-4">
                                 <button 
                                     onClick={() => setIsSidebarOpen(true)}
@@ -317,7 +321,7 @@ const ChatPage = ({ user, onLogout }) => {
                                     )}
                                 </div>
                                 <div>
-                                    <h3 className="font-bold text-gray-900 tracking-tight">{selectedUser.name}</h3>
+                                    <h3 className="font-bold text-gray-900 dark:text-white tracking-tight">{selectedUser.name}</h3>
                                     <div className="flex items-center gap-1.5 mt-0.5">
                                         <div className={clsx("w-1.5 h-1.5 rounded-full", onlineUsers.includes(selectedUser._id) ? "bg-emerald-500" : "bg-gray-300")}></div>
                                         <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">
@@ -332,7 +336,7 @@ const ChatPage = ({ user, onLogout }) => {
                                     <input 
                                         type="text" 
                                         placeholder="Search messages..." 
-                                        className="pl-9 pr-4 py-2 bg-gray-50 border-none rounded-xl text-xs w-0 group-hover:w-48 focus:w-48 transition-all outline-none"
+                                        className="pl-9 pr-4 py-2 bg-gray-50 dark:bg-slate-900 border-none rounded-xl text-xs w-0 group-hover:w-48 focus:w-48 transition-all outline-none dark:text-white dark:placeholder:text-slate-500"
                                         value={msgSearchQuery}
                                         onChange={(e) => setMsgSearchQuery(e.target.value)}
                                     />
@@ -344,15 +348,15 @@ const ChatPage = ({ user, onLogout }) => {
                         </div>
 
                         {/* Messages Feed */}
-                        <div className="flex-1 overflow-y-auto p-8 space-y-6 bg-[#f8fafc]/50 custom-scrollbar">
+                        <div className="flex-1 overflow-y-auto p-8 space-y-6 bg-[#f8fafc]/50 dark:bg-slate-950/50 custom-scrollbar">
                             {messages.length === 0 ? (
                                 <div className="h-full flex flex-col items-center justify-center space-y-4 opacity-40">
                                     <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-sm">
                                         <MessageSquare className="w-8 h-8 text-emerald-600" />
                                     </div>
                                     <div className="text-center">
-                                        <p className="text-sm font-bold text-gray-900">No messages yet</p>
-                                        <p className="text-xs font-medium">Send a message to start the conversation</p>
+                                        <p className="text-sm font-bold text-gray-900 dark:text-white">No messages yet</p>
+                                        <p className="text-xs font-medium dark:text-slate-400">Send a message to start the conversation</p>
                                     </div>
                                 </div>
                             ) : (
@@ -369,8 +373,8 @@ const ChatPage = ({ user, onLogout }) => {
                                     <React.Fragment key={idx}>
                                         {isNewDay && (
                                             <div className="flex justify-center my-8">
-                                                <div className="bg-white/80 backdrop-blur-sm border border-slate-100 px-4 py-1.5 rounded-full shadow-sm">
-                                                    <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">
+                                                <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border border-slate-100 dark:border-slate-800 px-4 py-1.5 rounded-full shadow-sm">
+                                                    <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
                                                         {new Date(msg.timestamp).toLocaleDateString([], { weekday: 'long', month: 'short', day: 'numeric' })}
                                                     </span>
                                                 </div>
@@ -378,8 +382,8 @@ const ChatPage = ({ user, onLogout }) => {
                                         )}
                                         <div className={clsx("flex flex-col animate-message", isMe ? "items-end" : "items-start")}>
                                         <div className={twMerge(
-                                            "max-w-[70%] p-4 shadow-sm overflow-hidden",
-                                            isMe ? "chat-bubble-sender shadow-emerald-200/50" : "chat-bubble-receiver"
+                                            "max-w-[70%] p-4 shadow-sm overflow-hidden transition-all",
+                                            isMe ? "chat-bubble-sender shadow-emerald-200/50 dark:shadow-emerald-950/20" : "chat-bubble-receiver dark:bg-slate-900 dark:border-slate-800 dark:text-slate-200"
                                         )}>
                                             {msg.image && (
                                                 <img src={msg.image} alt="Sent" className="max-w-full rounded-lg mb-2 cursor-pointer hover:opacity-90 transition-opacity" onClick={() => window.open(msg.image, '_blank')} />
@@ -405,10 +409,10 @@ const ChatPage = ({ user, onLogout }) => {
                                         exit={{ opacity: 0, scale: 0.8 }}
                                         className="flex flex-col items-start"
                                     >
-                                        <div className="chat-bubble-receiver p-4 flex gap-1 items-center">
-                                            <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                                            <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                                            <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                                        <div className="chat-bubble-receiver dark:bg-slate-900 dark:border-slate-800 p-4 flex gap-1 items-center">
+                                            <div className="w-1.5 h-1.5 bg-gray-400 dark:bg-slate-600 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                                            <div className="w-1.5 h-1.5 bg-gray-400 dark:bg-slate-600 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                                            <div className="w-1.5 h-1.5 bg-gray-400 dark:bg-slate-600 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
                                         </div>
                                     </motion.div>
                                 )}
@@ -417,7 +421,7 @@ const ChatPage = ({ user, onLogout }) => {
                         </div>
 
                         {/* Message Input */}
-                        <div className="p-6 bg-white">
+                        <div className="p-6 bg-white dark:bg-slate-950">
                             <form onSubmit={handleSendMessage} className="relative flex items-center gap-3">
                                 <div className="flex-1 relative group">
                                     <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
@@ -431,11 +435,11 @@ const ChatPage = ({ user, onLogout }) => {
                                             </button>
                                             <AnimatePresence>
                                                 {showEmojiPicker && (
-                                                    <motion.div 
+                                              <motion.div 
                                                         initial={{ opacity: 0, y: 10, scale: 0.95 }}
                                                         animate={{ opacity: 1, y: 0, scale: 1 }}
                                                         exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                                                        className="absolute bottom-12 left-0 bg-white p-3 rounded-2xl shadow-2xl border border-gray-100 z-50 w-64"
+                                                        className="absolute bottom-12 left-0 bg-white dark:bg-slate-900 p-3 rounded-2xl shadow-2xl border border-gray-100 dark:border-slate-800 z-50 w-64"
                                                     >
                                                         <div className="grid grid-cols-5 gap-2">
                                                             {emojis.map((emoji, i) => (
@@ -470,7 +474,7 @@ const ChatPage = ({ user, onLogout }) => {
                                     </div>
                                     <input 
                                         type="text" 
-                                        className="w-full pl-24 pr-4 py-4 bg-gray-50 border-none rounded-2xl focus:ring-4 focus:ring-emerald-50 transition-all outline-none font-medium"
+                                        className="w-full pl-24 pr-4 py-4 bg-gray-50 dark:bg-slate-900 border-none rounded-2xl focus:ring-4 focus:ring-emerald-50 dark:focus:ring-emerald-500/10 transition-all outline-none font-medium dark:text-white dark:placeholder:text-slate-500"
                                         placeholder="Type your message here..."
                                         value={newMessage}
                                         onKeyPress={(e) => e.key === 'Enter' && handleSendMessage(e)}
@@ -480,7 +484,7 @@ const ChatPage = ({ user, onLogout }) => {
                                         type="submit" 
                                         className={twMerge(
                                             "absolute right-3 top-1/2 -translate-y-1/2 p-2.5 rounded-xl transition-all shadow-md active:scale-95 btn-hover-effect",
-                                            newMessage.trim() ? "bg-[#059669] text-white shadow-emerald-200" : "bg-gray-200 text-white shadow-none cursor-not-allowed"
+                                            newMessage.trim() ? "bg-[#059669] text-white shadow-emerald-200 dark:shadow-emerald-950/40" : "bg-gray-200 dark:bg-slate-800 text-white dark:text-slate-600 shadow-none cursor-not-allowed"
                                         )}
                                     >
                                         <Send className="w-5 h-5" />
@@ -490,23 +494,23 @@ const ChatPage = ({ user, onLogout }) => {
                         </div>
                     </>
                 ) : (
-                    <div className="flex-1 flex flex-col items-center justify-center p-8 bg-gray-50/30">
-                        <div className="w-24 h-24 bg-white shadow-2xl shadow-emerald-900/5 rounded-[2.5rem] flex items-center justify-center mb-8 animate-pulse">
-                            <MessageSquare className="w-10 h-10 text-emerald-100" />
+                    <div className="flex-1 flex flex-col items-center justify-center p-8 bg-gray-50/30 dark:bg-slate-950/30">
+                        <div className="w-24 h-24 bg-white dark:bg-slate-900 shadow-2xl shadow-emerald-900/5 dark:shadow-emerald-950/20 rounded-[2.5rem] flex items-center justify-center mb-8 animate-pulse border border-transparent dark:border-slate-800">
+                            <MessageSquare className="w-10 h-10 text-emerald-100 dark:text-emerald-900/30" />
                         </div>
-                        <h3 className="text-2xl font-bold text-gray-900 mb-2">Welcome to your Atrium</h3>
-                        <p className="text-gray-400 text-center max-w-sm font-medium">Select a conversation from the sidebar to begin your crystal-clear digital communication.</p>
+                        <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Welcome to your Atrium</h3>
+                        <p className="text-gray-400 dark:text-slate-500 text-center max-w-sm font-medium">Select a conversation from the sidebar to begin your crystal-clear digital communication.</p>
                         
                         <div className="mt-12 grid grid-cols-2 gap-4 max-w-md w-full">
-                            <div className="p-5 bg-white rounded-3xl border border-gray-100 shadow-sm space-y-2">
-                                <div className="bg-blue-50 w-8 h-8 rounded-lg flex items-center justify-center"><Phone className="w-4 h-4 text-blue-500" /></div>
-                                <p className="text-xs font-bold text-gray-900">HD Voice Calls</p>
-                                <p className="text-[10px] text-gray-400 font-medium">Crystal clear audio connection coming soon.</p>
+                            <div className="p-5 bg-white dark:bg-slate-900 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-sm space-y-2">
+                                <div className="bg-blue-50 dark:bg-blue-900/20 w-8 h-8 rounded-lg flex items-center justify-center"><Phone className="w-4 h-4 text-blue-500" /></div>
+                                <p className="text-xs font-bold text-gray-900 dark:text-white">HD Voice Calls</p>
+                                <p className="text-[10px] text-gray-400 dark:text-slate-500 font-medium">Crystal clear audio connection coming soon.</p>
                             </div>
-                            <div className="p-5 bg-white rounded-3xl border border-gray-100 shadow-sm space-y-2">
-                                <div className="bg-emerald-50 w-8 h-8 rounded-lg flex items-center justify-center"><Video className="w-4 h-4 text-emerald-500" /></div>
-                                <p className="text-xs font-bold text-gray-900">Video Conf</p>
-                                <p className="text-[10px] text-gray-400 font-medium">Professional grade meetings in one click.</p>
+                            <div className="p-5 bg-white dark:bg-slate-900 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-sm space-y-2">
+                                <div className="bg-emerald-50 dark:bg-emerald-900/20 w-8 h-8 rounded-lg flex items-center justify-center"><Video className="w-4 h-4 text-emerald-500" /></div>
+                                <p className="text-xs font-bold text-gray-900 dark:text-white">Video Conf</p>
+                                <p className="text-[10px] text-gray-400 dark:text-slate-500 font-medium">Professional grade meetings in one click.</p>
                             </div>
                         </div>
                     </div>
@@ -524,8 +528,14 @@ const ChatPage = ({ user, onLogout }) => {
                     background: #f1f5f9;
                     border-radius: 10px;
                 }
+                .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+                    background: #1e293b;
+                }
                 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
                     background: #e2e8f0;
+                }
+                .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+                    background: #334155;
                 }
                 @keyframes shake {
                     0%, 100% { transform: translateX(0); }

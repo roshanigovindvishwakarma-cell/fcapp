@@ -3,7 +3,10 @@ import { io } from 'socket.io-client';
 
 const SocketContext = createContext();
 
-export const useSocket = () => useContext(SocketContext);
+export const useSocket = () => {
+    const context = useContext(SocketContext);
+    return context || { socket: null, onlineUsers: [] };
+};
 
 const SOCKET_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
 

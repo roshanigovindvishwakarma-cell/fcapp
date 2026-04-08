@@ -61,10 +61,10 @@ To organize your repository:
 
 ---
 
-## ✅ Final Deployed Links
-Once you follow the deployment steps, you will receive:
-- **Frontend URL**: [https://frontend-29l3c0m4y-roshanigovindvishwakarma-cells-projects.vercel.app](https://frontend-29l3c0m4y-roshanigovindvishwakarma-cells-projects.vercel.app)
-- **Backend API URL**: [https://backend-n4f7c410m-roshanigovindvishwakarma-cells-projects.vercel.app](https://backend-n4f7c410m-roshanigovindvishwakarma-cells-projects.vercel.app)
+## ✅ Final Project Links
+- **GitHub Repository**: [https://github.com/roshanigovindvishwakarma-cell/fcapp](https://github.com/roshanigovindvishwakarma-cell/fcapp)
+- **Frontend Live (Vercel)**: [https://frontend-29l3c0m4y-roshanigovindvishwakarma-cells-projects.vercel.app](https://frontend-29l3c0m4y-roshanigovindvishwakarma-cells-projects.vercel.app)
+- **Backend API (Vercel)**: [https://backend-n4f7c410m-roshanigovindvishwakarma-cells-projects.vercel.app](https://backend-n4f7c410m-roshanigovindvishwakarma-cells-projects.vercel.app)
 
 ---
 

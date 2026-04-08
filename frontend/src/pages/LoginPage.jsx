@@ -61,15 +61,15 @@ const LoginPage = ({ onLogin }) => {
             </div>
 
             {/* Right Side: Login Form */}
-            <div className="w-full md:w-1/2 flex items-center justify-center p-8 bg-gray-50/30">
+            <div className="w-full md:w-1/2 flex items-center justify-center p-8 bg-gray-50/30 dark:bg-slate-950/50">
                 <motion.div 
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="w-full max-w-md bg-white p-10 rounded-3xl shadow-2xl shadow-emerald-900/5 space-y-8"
+                    className="w-full max-w-md bg-white dark:bg-slate-900 p-10 rounded-3xl shadow-2xl shadow-emerald-900/5 dark:shadow-emerald-950/20 space-y-8 border border-transparent dark:border-slate-800"
                 >
                     <div className="space-y-2">
-                        <h2 className="text-3xl font-bold text-gray-900">Welcome back</h2>
-                        <p className="text-gray-500">Please enter your details to sign in.</p>
+                        <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Welcome back</h2>
+                        <p className="text-gray-500 dark:text-slate-400">Please enter your details to sign in.</p>
                     </div>
 
                     {error && (
@@ -80,13 +80,13 @@ const LoginPage = ({ onLogin }) => {
 
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <div className="space-y-2">
-                            <label className="text-sm font-semibold text-gray-700 ml-1">Email Address</label>
+                            <label className="text-sm font-semibold text-gray-700 dark:text-slate-300 ml-1">Email Address</label>
                             <div className="relative">
-                                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-slate-500" />
                                 <input 
                                     type="email" 
                                     required 
-                                    className="w-full pl-12 pr-4 py-4 bg-gray-50 border-transparent focus:border-primary focus:bg-white focus:ring-0 rounded-2xl transition-all outline-none text-gray-900"
+                                    className="w-full pl-12 pr-4 py-4 bg-gray-50 dark:bg-slate-800/50 border-transparent focus:border-primary focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-emerald-500/10 rounded-2xl transition-all outline-none text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-600"
                                     placeholder="name@company.com"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
@@ -96,15 +96,15 @@ const LoginPage = ({ onLogin }) => {
 
                         <div className="space-y-2">
                             <div className="flex justify-between items-center px-1">
-                                <label className="text-sm font-semibold text-gray-700">Password</label>
+                                <label className="text-sm font-semibold text-gray-700 dark:text-slate-300">Password</label>
                                 <a href="#" className="text-xs font-bold text-primary hover:text-primary-dark transition-colors">Forgot?</a>
                             </div>
                             <div className="relative">
-                                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-slate-500" />
                                 <input 
                                     type={showPassword ? "text" : "password"} 
                                     required 
-                                    className="w-full pl-12 pr-12 py-4 bg-gray-50 border-transparent focus:border-primary focus:bg-white focus:ring-0 rounded-2xl transition-all outline-none text-gray-900"
+                                    className="w-full pl-12 pr-12 py-4 bg-gray-50 dark:bg-slate-800/50 border-transparent focus:border-primary focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-emerald-500/10 rounded-2xl transition-all outline-none text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-600"
                                     placeholder="••••••••"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
@@ -112,7 +112,7 @@ const LoginPage = ({ onLogin }) => {
                                 <button 
                                     type="button"
                                     onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-4 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 outline-none"
+                                    className="absolute right-4 top-1/2 -translate-y-1/2 p-1 text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300 outline-none"
                                 >
                                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                                 </button>
@@ -120,8 +120,8 @@ const LoginPage = ({ onLogin }) => {
                         </div>
 
                         <div className="flex items-center gap-2 px-1">
-                            <input type="checkbox" className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary" id="remember" />
-                            <label htmlFor="remember" className="text-sm text-gray-500 font-medium">Keep me signed in</label>
+                            <input type="checkbox" className="w-4 h-4 rounded border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-primary focus:ring-primary" id="remember" />
+                            <label htmlFor="remember" className="text-sm text-gray-500 dark:text-slate-400 font-medium">Keep me signed in</label>
                         </div>
 
                         <button 
@@ -141,17 +141,17 @@ const LoginPage = ({ onLogin }) => {
                     </form>
 
                     <div className="relative">
-                        <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-100"></div></div>
-                        <div className="relative flex justify-center text-xs uppercase"><span className="bg-white px-4 text-gray-400 font-medium tracking-widest">Or continue with</span></div>
+                        <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-100 dark:border-slate-800"></div></div>
+                        <div className="relative flex justify-center text-xs uppercase"><span className="bg-white dark:bg-slate-900 px-4 text-gray-400 dark:text-slate-500 font-medium tracking-widest">Or continue with</span></div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
-                        <button className="flex items-center justify-center gap-2 py-3 px-4 bg-gray-50 hover:bg-gray-100 border border-gray-100 rounded-xl transition-all font-medium text-sm text-gray-700">
+                        <button className="flex items-center justify-center gap-2 py-3 px-4 bg-gray-50 dark:bg-slate-800/50 hover:bg-gray-100 dark:hover:bg-slate-800 border border-gray-100 dark:border-slate-800 rounded-xl transition-all font-medium text-sm text-gray-700 dark:text-slate-300">
                             <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-4 h-4" />
                             Google
                         </button>
-                        <button className="flex items-center justify-center gap-2 py-3 px-4 bg-gray-50 hover:bg-gray-100 border border-gray-100 rounded-xl transition-all font-medium text-sm text-gray-700">
-                            <img src="https://www.svgrepo.com/show/511330/apple-fill.svg" className="w-4 h-4" />
+                        <button className="flex items-center justify-center gap-2 py-3 px-4 bg-gray-50 dark:bg-slate-800/50 hover:bg-gray-100 dark:hover:bg-slate-800 border border-gray-100 dark:border-slate-800 rounded-xl transition-all font-medium text-sm text-gray-700 dark:text-slate-300">
+                            <img src="https://www.svgrepo.com/show/511330/apple-fill.svg" className="w-4 h-4 dark:invert" />
                             Apple
                         </button>
                     </div>
