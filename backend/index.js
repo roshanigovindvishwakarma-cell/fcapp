@@ -14,15 +14,36 @@ dotenv.config();
 
 const app = express();
 const server = http.createServer(app);
+const allowedOrigins = [
+    "https://fcapp-tawny.vercel.app", 
+    "https://frontend-five-tau-92.vercel.app",
+    "https://frontend-29l3c0m4y-roshanigovindvishwakarma-cells-projects.vercel.app",
+    "http://localhost:5173",
+    process.env.CLIENT_URL
+].filter(Boolean);
+
 const io = new Server(server, {
     cors: {
-        origin: process.env.CLIENT_URL || "*",
-        methods: ["GET", "POST"]
+        origin: (origin, callback) => {
+            if (!origin || allowedOrigins.includes(origin)) {
+                callback(null, true);
+            } else {
+                callback(new Error('Not allowed by CORS'));
+            }
+        },
+        methods: ["GET", "POST"],
+        credentials: true
     }
 });
 
 app.use(cors({
-    origin: ["https://fcapp-tawny.vercel.app", "http://localhost:5173", "*"],
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true
 }));

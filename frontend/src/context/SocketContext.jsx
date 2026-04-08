@@ -16,16 +16,33 @@ export const SocketProvider = ({ children, user }) => {
 
     useEffect(() => {
         if (user) {
-            const newSocket = io(SOCKET_URL);
+            const newSocket = io(SOCKET_URL, {
+                reconnection: true,
+                reconnectionAttempts: 5,
+                reconnectionDelay: 1000
+            });
+            
             setSocket(newSocket);
 
-            newSocket.emit('join', user._id);
+            newSocket.on('connect', () => {
+                console.log('Connected to socket server');
+                newSocket.emit('join', user._id);
+            });
+
+            newSocket.on('connect_error', (error) => {
+                console.error('Socket connection error:', error);
+            });
 
             newSocket.on('online_users', (users) => {
                 setOnlineUsers(users);
             });
 
-            return () => newSocket.close();
+            return () => {
+                newSocket.off('connect');
+                newSocket.off('connect_error');
+                newSocket.off('online_users');
+                newSocket.close();
+            };
         }
     }, [user]);
 
