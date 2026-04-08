@@ -1,7 +1,14 @@
 {
+  "name": "atrium-chat",
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
   "scripts": {
-    "build": "cd frontend && npm install && npm run build",
-    "install": "cd backend && npm install && cd ../frontend && npm install"
+    "build": "npm run build --workspace=frontend",
+    "install": "npm install"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.27",
