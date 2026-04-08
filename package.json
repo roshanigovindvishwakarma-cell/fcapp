@@ -1,4 +1,8 @@
 {
+  "scripts": {
+    "build": "cd frontend && npm install && npm run build",
+    "install": "cd backend && npm install && cd ../frontend && npm install"
+  },
   "devDependencies": {
     "autoprefixer": "^10.4.27",
     "postcss": "^8.5.8",
