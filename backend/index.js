@@ -14,18 +14,32 @@ dotenv.config();
 
 const app = express();
 const server = http.createServer(app);
+
 const allowedOrigins = [
-    "https://fcapp-tawny.vercel.app", 
+    "https://fcapp-tawny.vercel.app",
     "https://frontend-five-tau-92.vercel.app",
     "https://frontend-29l3c0m4y-roshanigovindvishwakarma-cells-projects.vercel.app",
     "http://localhost:5173",
     process.env.CLIENT_URL
 ].filter(Boolean);
 
+function isAllowedOrigin(origin) {
+    if (!origin) return true;
+    if (allowedOrigins.includes(origin)) return true;
+    // Allow Vercel preview + deployment domains for this project/team.
+    try {
+        const { hostname } = new URL(origin);
+        if (hostname.endsWith(".vercel.app")) return true;
+    } catch (_) {
+        // ignore invalid origins
+    }
+    return false;
+}
+
 const io = new Server(server, {
     cors: {
         origin: (origin, callback) => {
-            if (!origin || allowedOrigins.includes(origin)) {
+            if (isAllowedOrigin(origin)) {
                 callback(null, true);
             } else {
                 callback(new Error('Not allowed by CORS'));
@@ -36,17 +50,17 @@ const io = new Server(server, {
     }
 });
 
-app.use(cors({
+const corsOptions = {
     origin: (origin, callback) => {
-        if (!origin || allowedOrigins.includes(origin)) {
-            callback(null, true);
-        } else {
-            callback(new Error('Not allowed by CORS'));
-        }
+        if (isAllowedOrigin(origin)) return callback(null, true);
+        return callback(null, false);
     },
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     credentials: true
-}));
+};
+
+app.use(cors(corsOptions));
+app.options("*", cors(corsOptions));
 app.use(express.json());
 
 // Health Check
