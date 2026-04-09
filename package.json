@@ -7,8 +7,7 @@
     "backend"
   ],
   "scripts": {
-    "build": "npm run build --workspace=frontend",
-    "install": "npm install"
+    "build": "npm run build --workspace=frontend"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.27",
