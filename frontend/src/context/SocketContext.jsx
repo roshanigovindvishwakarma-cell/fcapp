@@ -8,7 +8,7 @@ export const useSocket = () => {
     return context || { socket: null, onlineUsers: [] };
 };
 
-const SOCKET_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+const SOCKET_URL = import.meta.env.VITE_BACKEND_URL || 'https://backend-n4f7c410m-roshanigovindvishwakarma-cells-projects.vercel.app';
 
 export const SocketProvider = ({ children, user }) => {
     const [socket, setSocket] = useState(null);

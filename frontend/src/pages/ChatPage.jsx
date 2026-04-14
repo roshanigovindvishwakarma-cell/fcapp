@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useSocket } from '../context/SocketContext';
 import { 
     MessageSquare, Search, Send, LogOut, User as UserIcon, 
-    MoreVertical, Phone, Video, Smile, Paperclip, Check, CheckCheck 
+    MoreVertical, Phone, Video, Smile, Paperclip, Check, CheckCheck, Github 
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { clsx } from 'clsx';
@@ -219,9 +219,20 @@ const ChatPage = ({ user, onLogout }) => {
                             </div>
                             <h2 className="text-xl font-bold text-gray-900 dark:text-white">Conversations</h2>
                         </div>
-                        <button onClick={onLogout} className="p-2.5 rounded-xl bg-gray-50 dark:bg-slate-800 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all">
-                            <LogOut className="w-5 h-5" />
-                        </button>
+                        <div className="flex items-center gap-2">
+                            <a 
+                                href="https://github.com/roshanigovindvishwakarma-cell/fcapp" 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="p-2.5 rounded-xl bg-gray-50 dark:bg-slate-800 text-gray-400 hover:text-primary hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all"
+                                title="View on GitHub"
+                            >
+                                <Github className="w-5 h-5" />
+                            </a>
+                            <button onClick={onLogout} className="p-2.5 rounded-xl bg-gray-50 dark:bg-slate-800 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all" title="Logout">
+                                <LogOut className="w-5 h-5" />
+                            </button>
+                        </div>
                     </div>
 
                     <div className="relative group">

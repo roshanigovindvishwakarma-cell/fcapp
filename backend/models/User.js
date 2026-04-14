@@ -22,6 +22,14 @@ const userSchema = new mongoose.Schema({
         type: String,
         default: ''
     },
+    githubId: {
+        type: String,
+        default: ''
+    },
+    githubUsername: {
+        type: String,
+        default: ''
+    },
     createdAt: {
         type: Date,
         default: Date.now

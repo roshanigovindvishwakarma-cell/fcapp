@@ -6,7 +6,10 @@ import { BrowserRouter } from 'react-router-dom'
 import axios from 'axios'
 import ErrorBoundary from './components/ErrorBoundary'
 
-axios.defaults.baseURL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'
+const BACKEND_URL = (import.meta.env.VITE_BACKEND_URL || 'https://backend-n4f7c410m-roshanigovindvishwakarma-cells-projects.vercel.app').replace(/\/$/, '');
+axios.defaults.baseURL = BACKEND_URL;
+
+console.log(`[App] Using Backend URL: ${BACKEND_URL}`);
 
 // Add interceptor to handle token expiration/auth errors
 axios.interceptors.response.use(

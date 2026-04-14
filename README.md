@@ -32,39 +32,35 @@ npm run dev
 
 ---
 
-## 🚀 Deployment Guide (Vercel)
+## 🚀 Deployment Guide
 
-### Frontend (Vercel)
-1. **Login**: `npx vercel login`
-2. **Deploy**:
-   - `cd frontend`
-   - `npx vercel --prod`
-3. **Environment**: Add `VITE_BACKEND_URL` in the Vercel dashboard.
+### **Important: Socket.IO on Vercel**
+Vercel's standard Serverless Functions **do not support Socket.IO** (websockets) because they are ephemeral. To make real-time chat work in production, you should:
+-   **Backend**: Deploy to [Railway](https://railway.app), [Render](https://render.com), or [DigitalOcean](https://digitalocean.com).
+-   **Frontend**: Can stay on [Vercel](https://vercel.com).
 
-### Backend (Vercel)
-1. **Deploy**:
-   - `cd backend`
-   - `npx vercel --prod`
-2. **Environment**: Add `MONGO_URI`, `JWT_SECRET`, and `CLIENT_URL` (your frontend URL) in the Vercel dashboard.
+### **Frontend Setup (Vercel)**
+1.  **Vercel Dashboard**: Create a new project pointing to your GitHub repo.
+2.  **Root Directory**: Set this to `frontend`.
+3.  **Environment Variables**: Add:
+    -   `VITE_BACKEND_URL`: Your live backend URL (e.g., `https://your-backend.railway.app`)
+    -   `VITE_GITHUB_CLIENT_ID`: Your GitHub OAuth Client ID.
 
----
-
-## 📦 GitHub Repo Link Structure
-To organize your repository:
-```
-/
-├── backend/       # Node.js MVC Server
-├── frontend/      # React/Vite/Tailwind Frontend
-├── .gitignore
-└── README.md      # This file
-```
+### **Backend Setup (Railway/Render)**
+1.  **Root Directory**: Set this to `backend`.
+2.  **Environment Variables**: Add:
+    -   `MONGO_URI`: Your MongoDB Atlas connection string.
+    -   `JWT_SECRET`: A long random string.
+    -   `CLIENT_URL`: Your live frontend URL (e.g., `https://atrium-chat.vercel.app`)
+    -   `GITHUB_CLIENT_ID`: Your GitHub OAuth Client ID.
+    -   `GITHUB_CLIENT_SECRET`: Your GitHub OAuth Client Secret.
 
 ---
 
-## ✅ Final Project Links
+## ✅ Current Project Links (Update these after redeploying)
 - **GitHub Repository**: [https://github.com/roshanigovindvishwakarma-cell/fcapp](https://github.com/roshanigovindvishwakarma-cell/fcapp)
 - **Frontend Live (Vercel)**: [https://frontend-29l3c0m4y-roshanigovindvishwakarma-cells-projects.vercel.app](https://frontend-29l3c0m4y-roshanigovindvishwakarma-cells-projects.vercel.app)
-- **Backend API (Vercel)**: [https://backend-n4f7c410m-roshanigovindvishwakarma-cells-projects.vercel.app](https://backend-n4f7c410m-roshanigovindvishwakarma-cells-projects.vercel.app)
+- **Backend API (Vercel - HTTP ONLY)**: [https://backend-n4f7c410m-roshanigovindvishwakarma-cells-projects.vercel.app](https://backend-n4f7c410m-roshanigovindvishwakarma-cells-projects.vercel.app)
 
 ---
 
