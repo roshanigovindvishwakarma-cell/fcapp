@@ -57,25 +57,24 @@ Vercel's standard Serverless Functions **do not support Socket.IO** (websockets)
 
 ---
 
-## ✅ Current Project Links (Update these after redeploying)
+## ✅ Current Project Links
 - **GitHub Repository**: [https://github.com/roshanigovindvishwakarma-cell/fcapp](https://github.com/roshanigovindvishwakarma-cell/fcapp)
-- **Frontend Live (Vercel)**: [https://frontend-29l3c0m4y-roshanigovindvishwakarma-cells-projects.vercel.app](https://frontend-29l3c0m4y-roshanigovindvishwakarma-cells-projects.vercel.app)
-- **Backend API (Vercel - HTTP ONLY)**: [https://backend-n4f7c410m-roshanigovindvishwakarma-cells-projects.vercel.app](https://backend-n4f7c410m-roshanigovindvishwakarma-cells-projects.vercel.app)
+- **Frontend Live (Vercel)**: [https://fcapp-tawny.vercel.app](https://fcapp-tawny.vercel.app)
+- **Backend API (Render)**: [https://atrium-chat-backend.onrender.com](https://atrium-chat-backend.onrender.com) (Primary - Supports Socket.IO)
+- **Backend API (Vercel)**: [https://backend-n4f7c410m-roshanigovindvishwakarma-cells-projects.vercel.app](https://backend-n4f7c410m-roshanigovindvishwakarma-cells-projects.vercel.app)
 
 ---
 
-## 🛠 Deployment Fix (CRITICAL)
-Currently, your Vercel backend is failing to connect because it's using `localhost`. To fix this:
-1. **MongoDB Atlas**: Get your connection string (M0 Free Tier).
-2. **Vercel Dashboard**: Go to your project `backend-weld-ten-95`.
-3. **Environment Variables**: Add:
-   - `MONGO_URI`: Your MongoDB Atlas string.
-   - `JWT_SECRET`: A long random string.
-   - `CLIENT_URL`: `https://frontend-five-tau-92.vercel.app`
-4. **Redeploy**: Click "Deploy" to apply the variables.
+## 🛠 Deployment Fixes Applied
+The following fixes have been merged into the codebase:
+1.  **Backend Listen Logic**: The server now correctly calls `listen()` when deployed on platforms like Render, while still allowing for Vercel's serverless export.
+2.  **Frontend Fallback URL**: The frontend now defaults to the stable Render backend (`atrium-chat-backend.onrender.com`) instead of local or broken URLs.
+3.  **CORS Policy**: Configured to automatically allow all `.vercel.app` subdomains.
 
----
-
+### Next Steps for Deployment:
+1.  **Push Changes**: Commit and push these changes to your GitHub repository.
+2.  **Redeploy Backend**: Render will automatically redeploy. Ensure `MONGO_URI` and `JWT_SECRET` are set in Render environment variables.
+3.  **Redeploy Frontend**: Vercel will redeploy. If you want to use a specific backend, update `VITE_BACKEND_URL` in Vercel settings.
 ## ⚡ Features
 - **JWT Auth**: Secure login/register.
 - **Real-time**: Instant messaging via Socket.IO.

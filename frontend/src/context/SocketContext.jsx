@@ -8,7 +8,7 @@ export const useSocket = () => {
     return context || { socket: null, onlineUsers: [] };
 };
 
-const SOCKET_URL = import.meta.env.VITE_BACKEND_URL || 'https://backend-n4f7c410m-roshanigovindvishwakarma-cells-projects.vercel.app';
+const SOCKET_URL = import.meta.env.VITE_BACKEND_URL || 'https://atrium-chat-backend.onrender.com';
 
 export const SocketProvider = ({ children, user }) => {
     const [socket, setSocket] = useState(null);

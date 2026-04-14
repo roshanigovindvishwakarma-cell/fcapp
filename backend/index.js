@@ -96,12 +96,13 @@ const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/chat-app';
 mongoose.connect(MONGO_URI)
     .then(() => {
         console.log('MongoDB Connected');
-        if (process.env.NODE_ENV !== "production") {
-            server.listen(PORT, () => {
-                console.log(`Server running on port ${PORT}`);
-            });
-        }
-    })
-    .catch(err => console.log(err));
+    // Start server (only if not on Vercel which handles this via exports)
+    if (!process.env.VERCEL) {
+        server.listen(PORT, () => {
+            console.log(`Server running on port ${PORT}`);
+        });
+    }
+})
+.catch(err => console.log(err));
 
 module.exports = app;

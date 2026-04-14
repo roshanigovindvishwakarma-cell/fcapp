@@ -10,6 +10,7 @@ const BACKEND_URL = (import.meta.env.VITE_BACKEND_URL || 'https://atrium-chat-ba
 axios.defaults.baseURL = BACKEND_URL;
 
 console.log(`[App] Using Backend URL: ${BACKEND_URL}`);
+console.log(`[App] Environment: ${import.meta.env.MODE}`);
 
 // Add interceptor to handle token expiration/auth errors
 axios.interceptors.response.use(
