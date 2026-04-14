@@ -6,7 +6,7 @@ import { BrowserRouter } from 'react-router-dom'
 import axios from 'axios'
 import ErrorBoundary from './components/ErrorBoundary'
 
-const BACKEND_URL = (import.meta.env.VITE_BACKEND_URL || 'https://backend-n4f7c410m-roshanigovindvishwakarma-cells-projects.vercel.app').replace(/\/$/, '');
+const BACKEND_URL = (import.meta.env.VITE_BACKEND_URL || 'https://atrium-chat-backend.onrender.com').replace(/\/$/, '');
 axios.defaults.baseURL = BACKEND_URL;
 
 console.log(`[App] Using Backend URL: ${BACKEND_URL}`);
