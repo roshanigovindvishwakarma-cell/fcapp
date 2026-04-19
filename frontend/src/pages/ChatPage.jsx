@@ -116,13 +116,45 @@ const ChatPage = ({ user, onLogout }) => {
                 setTypingUsers(prev => prev.filter(id => id !== senderId));
             });
 
+            socket.on('message_read', ({ messageId }) => {
+                setMessages(prev => prev.map(m => m._id === messageId ? { ...m, isRead: true } : m));
+            });
+
             return () => {
                 socket.off('receive_message');
                 socket.off('typing');
                 socket.off('stop_typing');
+                socket.off('message_read');
             };
         }
     }, [socket, selectedUser]);
+
+    // Mark incoming messages as read
+    useEffect(() => {
+        if (selectedUser && messages.length > 0) {
+            const lastMsg = messages[messages.length - 1];
+            if (lastMsg.senderId === selectedUser._id && !lastMsg.isRead) {
+                socket.emit('mark_read', { messageId: lastMsg._id, senderId: user._id });
+            }
+        }
+    }, [messages, selectedUser, socket, user._id]);
+
+    useEffect(() => {
+        const searchServerMessages = async () => {
+            if (msgSearchQuery.length > 2 && user?.token) {
+                try {
+                    const res = await axios.get(`/api/messages/search?query=${msgSearchQuery}`, {
+                        headers: { Authorization: `Bearer ${user.token}` }
+                    });
+                    setMessages(res.data);
+                } catch (err) {
+                    console.error("Search error:", err);
+                }
+            }
+        };
+        const timeoutId = setTimeout(searchServerMessages, 500);
+        return () => clearTimeout(timeoutId);
+    }, [msgSearchQuery, user?.token]);
 
     useEffect(() => {
         scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -141,11 +173,12 @@ const ChatPage = ({ user, onLogout }) => {
         };
 
         try {
-            await axios.post('/api/messages', messageData, {
+            const res = await axios.post('/api/messages', messageData, {
                 headers: { Authorization: `Bearer ${user.token}` }
             });
-            socket.emit('send_message', messageData);
-            setMessages((prev) => [...prev, messageData]);
+            const savedMsg = res.data;
+            socket.emit('send_message', savedMsg);
+            setMessages((prev) => [...prev, savedMsg]);
             setNewMessage('');
             socket.emit('stop_typing', { senderId: user._id, receiverId: selectedUser._id });
 
@@ -208,116 +241,138 @@ const ChatPage = ({ user, onLogout }) => {
         <div className="flex h-screen atrium-mesh overflow-hidden relative">
             {/* Sidebar */}
             <div className={twMerge(
-                "w-full md:max-w-[400px] border-r border-gray-100 dark:border-slate-800 flex flex-col bg-white dark:bg-slate-900 shadow-sm z-30 transition-all duration-300 absolute md:relative h-full",
+                "w-full md:max-w-[360px] border-r border-[#282D45] flex flex-col bg-[#1E2235] shadow-2xl z-30 transition-all duration-300 absolute md:relative h-full",
                 isSidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
             )}>
-                <div className="p-6 space-y-6">
+                <div className="p-6 space-y-6 flex flex-col h-full">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <div className="bg-[#059669] p-2 rounded-xl shadow-lg shadow-emerald-100 dark:shadow-emerald-900/20">
-                                <MessageSquare className="w-6 h-6 text-white" />
+                            <div className="bg-[#5E5CE6] p-2 rounded-xl shadow-lg">
+                                <MessageSquare className="w-5 h-5 text-white" />
                             </div>
-                            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Conversations</h2>
+                            <h1 className="text-xl font-bold text-white tracking-tight">NexaChat</h1>
                         </div>
-                        <div className="flex items-center gap-2">
-                            <a 
-                                href="https://github.com/roshanigovindvishwakarma-cell/fcapp" 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                className="p-2.5 rounded-xl bg-gray-50 dark:bg-slate-800 text-gray-400 hover:text-primary hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all"
-                                title="View on GitHub"
-                            >
-                                <Github className="w-5 h-5" />
-                            </a>
-                            <button onClick={onLogout} className="p-2.5 rounded-xl bg-gray-50 dark:bg-slate-800 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all" title="Logout">
-                                <LogOut className="w-5 h-5" />
-                            </button>
-                        </div>
+                        <button onClick={onLogout} className="p-2 rounded-xl text-slate-500 hover:text-white transition-all">
+                            <LogOut className="w-5 h-5" />
+                        </button>
                     </div>
 
-                    <div className="relative group">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-primary transition-colors" />
+                    <div className="relative">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
                         <input 
                             type="text" 
-                            className="w-full pl-11 pr-4 py-3.5 bg-gray-50 dark:bg-slate-800 border-none rounded-2xl focus:ring-4 focus:ring-emerald-50 dark:focus:ring-emerald-500/10 transition-all outline-none text-sm font-medium dark:text-white dark:placeholder:text-slate-500"
-                            placeholder="Search people..."
+                            className="w-full pl-11 pr-4 py-3 bg-[#282D45] border-none rounded-xl focus:ring-1 focus:ring-slate-600 transition-all outline-none text-sm font-medium text-white placeholder:text-slate-500"
+                            placeholder="Search conversations..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                         />
                     </div>
-                </div>
 
-                <div className="flex-1 overflow-y-auto custom-scrollbar px-3 space-y-1">
-                    {filteredUsers.map((u) => (
-                        <button 
-                            key={u._id}
-                            onClick={() => {
-                                setSelectedUser(u);
-                                if (window.innerWidth < 768) setIsSidebarOpen(false);
-                            }}
-                            className={twMerge(
-                                "w-full p-4 flex items-center gap-4 rounded-[20px] transition-all group relative text-left",
-                                selectedUser?._id === u?._id ? "bg-emerald-50/70 dark:bg-emerald-900/20 shadow-sm" : "hover:bg-gray-50 dark:hover:bg-slate-800/50"
-                            )}
-                        >
-                            <div className="relative">
-                                <img src={`https://i.pravatar.cc/100?u=${u._id}`} className="w-14 h-14 rounded-[22px] border-2 border-white avatar-shadow object-cover" alt={u.name} />
-                                {onlineUsers.includes(u._id) && (
-                                    <div className="absolute -bottom-0.5 -right-0.5 w-4.5 h-4.5 bg-emerald-500 border-2 border-white rounded-full status-online-glow"></div>
-                                )}
-                            </div>
-                            <div className="flex-1 text-left">
-                                <div className="flex justify-between items-center mb-0.5">
-                                    <h3 className="font-bold text-gray-900 dark:text-white group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors line-clamp-1">{u.name}</h3>
-                                    {u.lastMessage && (
-                                        <span className="text-[10px] font-bold text-gray-300">
-                                            {new Date(u.lastMessage.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                        </span>
+                    <div className="space-y-4">
+                        <h3 className="text-[11px] font-bold text-slate-500 uppercase tracking-widest px-1">Online Now</h3>
+                        <div className="flex items-center gap-4 overflow-x-auto pb-2 custom-scrollbar no-scrollbar scroll-smooth">
+                            {onlineUsers.filter(id => id !== user._id).map(id => {
+                                const onlineUser = users.find(u => u._id === id);
+                                if (!onlineUser) return null;
+                                return (
+                                    <div key={id} className="flex flex-col items-center gap-2 min-w-[50px] cursor-pointer" onClick={() => setSelectedUser(onlineUser)}>
+                                        <div className="relative">
+                                            <div className="w-[48px] h-[48px] rounded-full flex items-center justify-center text-sm font-bold border-2 border-slate-700 bg-slate-800 text-white hover:border-primary transition-colors">
+                                                {onlineUser.name.split(' ').map(n => n[0]).join('')}
+                                            </div>
+                                            <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-emerald-500 border-2 border-[#1E2235] rounded-full"></div>
+                                        </div>
+                                        <span className="text-[10px] text-slate-400 font-medium truncate w-full text-center">{onlineUser.name.split(' ')[0]}</span>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+
+                    <div className="flex-1 flex flex-col overflow-hidden">
+                        <h3 className="text-[11px] font-bold text-slate-500 uppercase tracking-widest px-1 mb-4">Messages</h3>
+                        <div className="flex-1 overflow-y-auto custom-scrollbar space-y-1 pr-1">
+                            {filteredUsers.map((u) => (
+                                <button 
+                                    key={u._id}
+                                    onClick={() => {
+                                        setSelectedUser(u);
+                                        if (window.innerWidth < 768) setIsSidebarOpen(false);
+                                    }}
+                                    className={twMerge(
+                                        "w-full p-3.5 flex items-center gap-4 transition-all rounded-xl relative text-left group",
+                                        selectedUser?._id === u?._id ? "bg-[#282D45] shadow-lg" : "hover:bg-slate-800/40"
                                     )}
-                                </div>
-                                <div className="flex items-center justify-between">
-                                    <p className={clsx(
-                                        "text-xs font-medium truncate max-w-[160px]",
-                                        typingUsers.includes(u._id) ? "text-emerald-600 font-bold animate-pulse" : "text-gray-400"
-                                    )}>
-                                        {typingUsers.includes(u._id) ? "Typing..." : (
-                                            u.lastMessage ? (
-                                                <span className="flex items-center gap-1">
-                                                    {u.lastMessage.senderId === user._id && <Check className="w-3 h-3" />}
-                                                    {u.lastMessage.image ? "Sent an image" : u.lastMessage.content}
-                                                </span>
-                                            ) : (onlineUsers.includes(u._id) ? "Active now" : "Offline")
+                                >
+                                    <div className="relative">
+                                        <div className={twMerge(
+                                            "w-12 h-12 rounded-full flex items-center justify-center text-sm font-bold border-2 border-slate-700 bg-slate-800 text-white group-hover:border-slate-500 transition-colors",
+                                            selectedUser?._id === u?._id && "border-primary"
+                                        )}>
+                                            {u.name.split(' ').map(n => n[0]).join('')}
+                                        </div>
+                                        {onlineUsers.includes(u._id) && (
+                                            <div className="absolute bottom-0.5 right-0.5 w-3 h-3 bg-emerald-500 border-2 border-[#1E2235] rounded-full"></div>
                                         )}
-                                    </p>
-                                    {u.lastMessage && !u.lastMessage.isRead && u.lastMessage.senderId !== user._id && (
-                                        <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
-                                    )}
-                                </div>
-                            </div>
-                            {selectedUser?._id === u._id && (
-                                <div className="absolute right-4 top-1/2 -translate-y-1/2 w-1.5 h-12 bg-[#059669] rounded-full"></div>
-                            )}
-                        </button>
-                    ))}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex justify-between items-center mb-0.5">
+                                            <h3 className="font-bold text-white text-sm truncate">{u.name}</h3>
+                                            <span className="text-[10px] font-medium text-slate-500">
+                                                {u.lastMessage ? new Date(u.lastMessage.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center justify-between gap-2">
+                                            <p className={clsx(
+                                                "text-xs font-medium truncate",
+                                                typingUsers.includes(u._id) ? "text-primary font-bold animate-pulse" : "text-slate-500"
+                                            )}>
+                                                {typingUsers.includes(u._id) ? "Typing..." : (
+                                                    u.lastMessage ? u.lastMessage.content : "No messages yet"
+                                                )}
+                                            </p>
+                                            {u.lastMessage && !u.lastMessage.isRead && u.lastMessage.senderId !== user._id && (
+                                                <div className="w-5 h-5 bg-primary text-white text-[10px] font-bold rounded-full flex items-center justify-center min-w-[20px]">
+                                                    1
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
                 </div>
 
-                <div className="p-4 border-t border-gray-50 dark:border-slate-800 bg-gray-50/20 dark:bg-slate-900/20">
-                    <div className="flex items-center gap-3 p-3 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700">
-                        <img src={`https://i.pravatar.cc/100?u=${user._id}`} className="w-10 h-10 rounded-xl" alt={user.name} />
+                <div className="p-4 border-t border-[#282D45] bg-[#1E2235]">
+                    <div onClick={async () => {
+                        const newName = prompt("Enter new name:", user.name);
+                        if (newName && newName !== user.name) {
+                            try {
+                                const res = await axios.put('/api/users/update-profile', { name: newName }, {
+                                    headers: { Authorization: `Bearer ${user.token}` }
+                                });
+                                alert("Name updated! Please refresh to see changes.");
+                            } catch (err) { console.error(err); }
+                        }
+                    }} className="flex items-center gap-3 p-3 bg-[#282D45] rounded-xl shadow-lg cursor-pointer hover:bg-slate-700 transition-colors">
+                        <div className="w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold bg-primary text-white">
+                            {user.name.split(' ').map(n => n[0]).join('')}
+                        </div>
                         <div className="flex-1 text-left">
-                            <p className="text-xs font-bold text-gray-900 dark:text-white leading-none">{user.name}</p>
-                            <p className="text-[10px] font-medium text-emerald-600 dark:text-emerald-400 mt-1 uppercase tracking-wider">Online Profile</p>
+                            <p className="text-xs font-bold text-white leading-none">{user.name}</p>
+                            <p className="text-[10px] font-medium text-slate-500 mt-1 uppercase tracking-wider">Edit Profile</p>
                         </div>
                     </div>
                 </div>
             </div>
 
             {/* Chat Window */}
-            <div className="flex-1 flex flex-col bg-white dark:bg-slate-950 relative h-full">
+            <div className="flex-1 flex flex-col bg-[#141625] relative h-full">
                 {selectedUser ? (
                     <>
                         {/* Chat Header */}
-                        <div className="p-4 md:p-5 border-b border-gray-50 dark:border-slate-800 flex items-center justify-between z-10 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md">
+                        <div className="p-4 md:p-5 border-b border-[#282D45] flex items-center justify-between z-10 bg-[#141625]/80 backdrop-blur-md">
                             <div className="flex items-center gap-3 md:gap-4">
                                 <button 
                                     onClick={() => setIsSidebarOpen(true)}
@@ -359,7 +414,7 @@ const ChatPage = ({ user, onLogout }) => {
                         </div>
 
                         {/* Messages Feed */}
-                        <div className="flex-1 overflow-y-auto p-8 space-y-6 bg-[#f8fafc]/50 dark:bg-slate-950/50 custom-scrollbar">
+                        <div className="flex-1 overflow-y-auto p-8 space-y-6 bg-[#1a1d2d] custom-scrollbar">
                             {messages.length === 0 ? (
                                 <div className="h-full flex flex-col items-center justify-center space-y-4 opacity-40">
                                     <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-sm">
@@ -405,7 +460,12 @@ const ChatPage = ({ user, onLogout }) => {
                                             <span className="text-[10px] font-bold text-gray-400 uppercase">
                                                 {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                             </span>
-                                            {isMe && <CheckCheck className="w-3 h-3 text-emerald-500" />}
+                                            {isMe && (
+                                                <CheckCheck className={twMerge(
+                                                    "w-3.5 h-3.5 transition-colors",
+                                                    msg.isRead ? "text-[#3B82F6]" : "text-slate-500"
+                                                )} />
+                                            )}
                                         </div>
                                         </div>
                                     </React.Fragment>
@@ -432,7 +492,7 @@ const ChatPage = ({ user, onLogout }) => {
                         </div>
 
                         {/* Message Input */}
-                        <div className="p-6 bg-white dark:bg-slate-950">
+                        <div className="p-6 bg-[#141625] border-t border-[#282D45]">
                             <form onSubmit={handleSendMessage} className="relative flex items-center gap-3">
                                 <div className="flex-1 relative group">
                                     <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
@@ -440,7 +500,7 @@ const ChatPage = ({ user, onLogout }) => {
                                             <button 
                                                 type="button" 
                                                 onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                                                className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-400 transition-colors"
+                                                className="p-1.5 hover:bg-slate-800 rounded-lg text-slate-500 transition-colors"
                                             >
                                                 <Smile className="w-5 h-5" />
                                             </button>
@@ -450,7 +510,7 @@ const ChatPage = ({ user, onLogout }) => {
                                                         initial={{ opacity: 0, y: 10, scale: 0.95 }}
                                                         animate={{ opacity: 1, y: 0, scale: 1 }}
                                                         exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                                                        className="absolute bottom-12 left-0 bg-white dark:bg-slate-900 p-3 rounded-2xl shadow-2xl border border-gray-100 dark:border-slate-800 z-50 w-64"
+                                                        className="absolute bottom-12 left-0 bg-[#282D45] p-3 rounded-2xl shadow-2xl border border-slate-700 z-50 w-64"
                                                     >
                                                         <div className="grid grid-cols-5 gap-2">
                                                             {emojis.map((emoji, i) => (
@@ -458,7 +518,7 @@ const ChatPage = ({ user, onLogout }) => {
                                                                     key={i} 
                                                                     type="button"
                                                                     onClick={() => handleEmojiClick(emoji)}
-                                                                    className="text-xl hover:bg-gray-50 p-2 rounded-xl transition-colors"
+                                                                    className="text-xl hover:bg-slate-700 p-2 rounded-xl transition-colors"
                                                                 >
                                                                     {emoji}
                                                                 </button>
@@ -478,14 +538,14 @@ const ChatPage = ({ user, onLogout }) => {
                                         <button 
                                             type="button" 
                                             onClick={() => fileInputRef.current.click()}
-                                            className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-400 transition-colors"
+                                            className="p-1.5 hover:bg-slate-800 rounded-lg text-slate-500 transition-colors"
                                         >
                                             <Paperclip className="w-5 h-5" />
                                         </button>
                                     </div>
                                     <input 
                                         type="text" 
-                                        className="w-full pl-24 pr-4 py-4 bg-gray-50 dark:bg-slate-900 border-none rounded-2xl focus:ring-4 focus:ring-emerald-50 dark:focus:ring-emerald-500/10 transition-all outline-none font-medium dark:text-white dark:placeholder:text-slate-500"
+                                        className="w-full pl-24 pr-4 py-4 bg-[#1E2235] border-none rounded-2xl focus:ring-1 focus:ring-primary/30 transition-all outline-none font-medium text-white placeholder:text-slate-600"
                                         placeholder="Type your message here..."
                                         value={newMessage}
                                         onKeyPress={(e) => e.key === 'Enter' && handleSendMessage(e)}
@@ -495,7 +555,7 @@ const ChatPage = ({ user, onLogout }) => {
                                         type="submit" 
                                         className={twMerge(
                                             "absolute right-3 top-1/2 -translate-y-1/2 p-2.5 rounded-xl transition-all shadow-md active:scale-95 btn-hover-effect",
-                                            newMessage.trim() ? "bg-[#059669] text-white shadow-emerald-200 dark:shadow-emerald-950/40" : "bg-gray-200 dark:bg-slate-800 text-white dark:text-slate-600 shadow-none cursor-not-allowed"
+                                            newMessage.trim() ? "bg-primary text-white shadow-primary/20" : "bg-slate-800 text-slate-600 shadow-none cursor-not-allowed"
                                         )}
                                     >
                                         <Send className="w-5 h-5" />
@@ -530,31 +590,21 @@ const ChatPage = ({ user, onLogout }) => {
             
             <style>{`
                 .custom-scrollbar::-webkit-scrollbar {
-                    width: 4px;
+                    width: 3px;
                 }
                 .custom-scrollbar::-webkit-scrollbar-track {
                     background: transparent;
                 }
                 .custom-scrollbar::-webkit-scrollbar-thumb {
-                    background: #f1f5f9;
+                    background: #282D45;
                     border-radius: 10px;
                 }
-                .dark .custom-scrollbar::-webkit-scrollbar-thumb {
-                    background: #1e293b;
+                .no-scrollbar::-webkit-scrollbar {
+                    display: none;
                 }
-                .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-                    background: #e2e8f0;
-                }
-                .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-                    background: #334155;
-                }
-                @keyframes shake {
-                    0%, 100% { transform: translateX(0); }
-                    25% { transform: translateX(-4px); }
-                    75% { transform: translateX(4px); }
-                }
-                .animate-shake {
-                    animation: shake 0.4s ease-in-out;
+                .no-scrollbar {
+                    -ms-overflow-style: none;
+                    scrollbar-width: none;
                 }
             `}</style>
         </div>

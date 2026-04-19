@@ -30,6 +30,11 @@ const userSchema = new mongoose.Schema({
         type: String,
         default: ''
     },
+    status: {
+        type: String,
+        default: 'online',
+        enum: ['online', 'away', 'busy', 'offline']
+    },
     createdAt: {
         type: Date,
         default: Date.now

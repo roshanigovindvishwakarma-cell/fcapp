@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const Message = require('../models/Message');
 
 const users = {}; // userId: socketId
 
@@ -38,6 +39,23 @@ exports.socketManager = (io) => {
             const receiverSocketId = users[receiverId];
             if (receiverSocketId) {
                 io.to(receiverSocketId).emit('stop_typing', { senderId });
+            }
+        });
+
+        socket.on('mark_read', async (data) => {
+            const { messageId, senderId } = data;
+            try {
+                // Notify the sender that the message was read
+                const senderSocketId = users[senderId];
+                if (senderSocketId) {
+                    io.to(senderSocketId).emit('message_read', { messageId });
+                }
+                // Update database
+                if (messageId) {
+                    await Message.findByIdAndUpdate(messageId, { isRead: true });
+                }
+            } catch (err) {
+                console.error("Mark Read Error:", err);
             }
         });
 

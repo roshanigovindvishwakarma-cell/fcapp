@@ -4,6 +4,9 @@ const { Server } = require('socket.io');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const helmet = require('helmet');
+const morgan = require('morgan');
+const rateLimit = require('express-rate-limit');
 
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
@@ -63,10 +66,23 @@ const corsOptions = {
     optionsSuccessStatus: 200
 };
 
+app.use(helmet({
+    crossOriginResourcePolicy: false, // Required for cross-origin images/sockets
+}));
+app.use(morgan('dev'));
+
+// Rate Limiting
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // Limit each IP to 100 requests per windowMs
+    message: 'Too many requests from this IP, please try again after 15 minutes'
+});
+app.use('/api/', limiter);
+
 app.use(cors(corsOptions));
-app.options('*', cors(corsOptions)); // Handle preflight requests
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// Note: cors() middleware handles preflight automatically for all routes it is applied to.
+app.use(express.json({ limit: '10mb' })); // Increase limit for base64 images
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 app.get('/', (req, res) => {
     res.json({ message: 'Backend is running!', version: '1.0.1' });
@@ -95,14 +111,21 @@ const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/chat-app';
 
 mongoose.connect(MONGO_URI)
     .then(() => {
-        console.log('MongoDB Connected');
+        console.log('✅ MongoDB Connected Successfully');
+        console.log(`📡 DB Host: ${mongoose.connection.host}`);
+        
     // Start server (only if not on Vercel which handles this via exports)
     if (!process.env.VERCEL) {
         server.listen(PORT, () => {
-            console.log(`Server running on port ${PORT}`);
+            console.log(`🚀 Server running on port ${PORT}`);
+            console.log(`🔗 Local Link: http://localhost:${PORT}`);
         });
     }
 })
-.catch(err => console.log(err));
+.catch(err => {
+    console.error('❌ MongoDB Connection Error:');
+    console.error(err.message);
+    console.log('💡 TIP: Make sure your MongoDB service is running or check your MONGO_URI in .env');
+});
 
 module.exports = app;

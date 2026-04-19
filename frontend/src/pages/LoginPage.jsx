@@ -58,19 +58,19 @@ const LoginPage = ({ onLogin }) => {
     };
 
     return (
-        <div className="flex flex-col md:flex-row min-h-screen atrium-mesh">
+        <div className="flex flex-col md:flex-row min-h-screen bg-[#1a1d2d]">
             {/* Left Side: Brand/Marketing */}
-            <div className="hidden md:flex md:w-1/2 bg-[#059669] p-12 text-white flex-col justify-between relative overflow-hidden">
+            <div className="hidden md:flex md:w-1/2 bg-[#1a1d2d] p-12 text-white flex-col justify-between relative overflow-hidden border-r border-slate-800">
                 <div className="relative z-10">
                     <div className="flex items-center gap-2 mb-12">
-                        <div className="bg-white/20 p-2 rounded-lg backdrop-blur-md">
+                        <div className="bg-primary p-2 rounded-lg">
                             <MessageSquare className="w-6 h-6" />
                         </div>
-                        <span className="text-xl font-semibold tracking-tight">Atrium Chat</span>
+                        <span className="text-xl font-semibold tracking-tight">NexaChat</span>
                     </div>
                     
                     <h1 className="text-5xl font-bold leading-tight mb-6">
-                        Step into the <br /> Digital Atrium.
+                        Experience the <br /> Next-Gen Chat.
                     </h1>
                     <p className="text-white/80 text-lg max-w-sm">
                         Experience crystal-clear conversations in a space designed for professional clarity and organic flow.
@@ -114,11 +114,11 @@ const LoginPage = ({ onLogin }) => {
             </div>
 
             {/* Right Side: Login Form */}
-            <div className="w-full md:w-1/2 flex items-center justify-center p-8 bg-gray-50/30 dark:bg-slate-950/50">
+            <div className="w-full md:w-1/2 flex items-center justify-center p-8 bg-[#1a1d2d]">
                 <motion.div 
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="w-full max-w-md bg-white dark:bg-slate-900 p-10 rounded-3xl shadow-2xl shadow-emerald-900/5 dark:shadow-emerald-950/20 space-y-8 border border-transparent dark:border-slate-800"
+                    className="w-full max-w-md bg-[#1E2235] p-10 rounded-3xl shadow-2xl space-y-8 border border-slate-800"
                 >
                     <div className="space-y-2">
                         <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Welcome back</h2>
@@ -139,7 +139,7 @@ const LoginPage = ({ onLogin }) => {
                                 <input 
                                     type="email" 
                                     required 
-                                    className="w-full pl-12 pr-4 py-4 bg-gray-50 dark:bg-slate-800/50 border-transparent focus:border-primary focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-emerald-500/10 rounded-2xl transition-all outline-none text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-600"
+                                    className="w-full pl-12 pr-4 py-4 bg-[#282D45] border-transparent focus:border-primary focus:ring-1 focus:ring-primary/30 rounded-2xl transition-all outline-none text-white placeholder:text-slate-600"
                                     placeholder="name@company.com"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
@@ -149,15 +149,15 @@ const LoginPage = ({ onLogin }) => {
 
                         <div className="space-y-2">
                             <div className="flex justify-between items-center px-1">
-                                <label className="text-sm font-semibold text-gray-700 dark:text-slate-300">Password</label>
-                                <a href="#" className="text-xs font-bold text-primary hover:text-primary-dark transition-colors">Forgot?</a>
+                                <label className="text-sm font-semibold text-slate-300">Password</label>
+                                <a href="#" className="text-xs font-bold text-primary hover:text-white transition-colors">Forgot?</a>
                             </div>
                             <div className="relative">
-                                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-slate-500" />
+                                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
                                 <input 
                                     type={showPassword ? "text" : "password"} 
                                     required 
-                                    className="w-full pl-12 pr-12 py-4 bg-gray-50 dark:bg-slate-800/50 border-transparent focus:border-primary focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-emerald-500/10 rounded-2xl transition-all outline-none text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-slate-600"
+                                    className="w-full pl-12 pr-12 py-4 bg-[#282D45] border-transparent focus:border-primary focus:ring-1 focus:ring-primary/30 rounded-2xl transition-all outline-none text-white placeholder:text-slate-600"
                                     placeholder="••••••••"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
@@ -165,7 +165,7 @@ const LoginPage = ({ onLogin }) => {
                                 <button 
                                     type="button"
                                     onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-4 top-1/2 -translate-y-1/2 p-1 text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300 outline-none"
+                                    className="absolute right-4 top-1/2 -translate-y-1/2 p-1 text-slate-500 hover:text-white transition-colors outline-none"
                                 >
                                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                                 </button>
@@ -173,14 +173,14 @@ const LoginPage = ({ onLogin }) => {
                         </div>
 
                         <div className="flex items-center gap-2 px-1">
-                            <input type="checkbox" className="w-4 h-4 rounded border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-primary focus:ring-primary" id="remember" />
-                            <label htmlFor="remember" className="text-sm text-gray-500 dark:text-slate-400 font-medium">Keep me signed in</label>
+                            <input type="checkbox" className="w-4 h-4 rounded border-slate-700 bg-slate-800 text-primary focus:ring-primary" id="remember" />
+                            <label htmlFor="remember" className="text-sm text-slate-400 font-medium">Keep me signed in</label>
                         </div>
 
                         <button 
                             type="submit" 
                             disabled={loading}
-                            className="w-full py-4 bg-[#059669] hover:bg-[#047857] text-white rounded-2xl font-bold text-lg transition-all shadow-lg active:scale-[0.98] disabled:opacity-70 flex items-center justify-center gap-2 group btn-hover-effect"
+                            className="w-full py-4 bg-primary hover:brightness-110 text-white rounded-2xl font-bold text-lg transition-all shadow-lg active:scale-[0.98] disabled:opacity-70 flex items-center justify-center gap-2 group btn-hover-effect"
                         >
                             {loading ? (
                                 <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>

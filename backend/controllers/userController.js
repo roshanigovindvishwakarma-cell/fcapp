@@ -32,3 +32,27 @@ exports.getUsers = async (req, res) => {
         res.status(400).json({ message: error.message });
     }
 };
+
+exports.updateProfile = async (req, res) => {
+    try {
+        const { name, profilePic } = req.body;
+        const user = await User.findById(req.user._id);
+
+        if (user) {
+            user.name = name || user.name;
+            user.profilePic = profilePic || user.profilePic;
+
+            const updatedUser = await user.save();
+            res.json({
+                _id: updatedUser._id,
+                name: updatedUser.name,
+                email: updatedUser.email,
+                profilePic: updatedUser.profilePic
+            });
+        } else {
+            res.status(404).json({ message: 'User not found' });
+        }
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+};
