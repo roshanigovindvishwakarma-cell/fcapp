@@ -113,19 +113,17 @@ mongoose.connect(MONGO_URI)
     .then(() => {
         console.log('✅ MongoDB Connected Successfully');
         console.log(`📡 DB Host: ${mongoose.connection.host}`);
-        
-    // Start server (only if not on Vercel which handles this via exports)
-    if (!process.env.VERCEL) {
-        server.listen(PORT, () => {
-            console.log(`🚀 Server running on port ${PORT}`);
-            console.log(`🔗 Local Link: http://localhost:${PORT}`);
-        });
-    }
-})
-.catch(err => {
-    console.error('❌ MongoDB Connection Error:');
-    console.error(err.message);
-    console.log('💡 TIP: Make sure your MongoDB service is running or check your MONGO_URI in .env');
-});
+    })
+    .catch(err => {
+        console.error('❌ MongoDB Connection Error:', err.message);
+    });
+
+// Start server independently for maximum uptime
+if (!process.env.VERCEL) {
+    server.listen(PORT, '0.0.0.0', () => {
+        console.log(`🚀 Server running on port ${PORT}`);
+        console.log(`🔗 Local Link: http://localhost:${PORT}`);
+    });
+}
 
 module.exports = app;
