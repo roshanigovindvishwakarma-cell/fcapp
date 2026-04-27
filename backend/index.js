@@ -31,11 +31,14 @@ function isAllowedOrigin(origin) {
     if (!origin) return true;
     if (allowedOrigins.includes(origin)) return true;
     
-    // Allow any Vercel domain for this user
+    // Allow any Vercel domain or local network IPs
     try {
         const { hostname } = new URL(origin);
         if (hostname.endsWith(".vercel.app")) return true;
         if (hostname === "localhost" || hostname === "127.0.0.1") return true;
+        
+        // Allow common local network IP patterns (e.g., 10.x.x.x, 192.168.x.x)
+        if (hostname.startsWith("10.") || hostname.startsWith("192.168.") || hostname.startsWith("172.")) return true;
     } catch (_) {
         // ignore invalid origins
     }
@@ -66,6 +69,7 @@ const corsOptions = {
     optionsSuccessStatus: 200
 };
 
+app.use(cors(corsOptions));
 app.use(helmet({
     crossOriginResourcePolicy: false, // Required for cross-origin images/sockets
 }));
@@ -78,8 +82,6 @@ const limiter = rateLimit({
     message: 'Too many requests from this IP, please try again after 15 minutes'
 });
 app.use('/api/', limiter);
-
-app.use(cors(corsOptions));
 // Note: cors() middleware handles preflight automatically for all routes it is applied to.
 app.use(express.json({ limit: '10mb' })); // Increase limit for base64 images
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));

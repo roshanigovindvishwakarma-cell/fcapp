@@ -19,7 +19,9 @@ export const SocketProvider = ({ children, user }) => {
             const newSocket = io(SOCKET_URL, {
                 reconnection: true,
                 reconnectionAttempts: 5,
-                reconnectionDelay: 1000
+                reconnectionDelay: 1000,
+                withCredentials: true,
+                transports: ['websocket', 'polling']
             });
             
             setSocket(newSocket);

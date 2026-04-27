@@ -13,8 +13,19 @@ exports.socketManager = (io) => {
             console.log(`User ${userId} joined with socket ${socket.id}`);
         });
 
-        socket.on('send_message', (data) => {
+        socket.on('send_message', async (data) => {
             const { senderId, receiverId, message, image, timestamp } = data;
+            
+            // Check for blocking
+            const receiver = await User.findById(receiverId);
+            const isBlockedByReceiver = receiver?.blockedUsers.includes(senderId);
+            const sender = await User.findById(senderId);
+            const isBlockedBySender = sender?.blockedUsers.includes(receiverId);
+
+            if (isBlockedByReceiver || isBlockedBySender) {
+                return socket.emit('error', { message: 'Message could not be sent. User is blocked.' });
+            }
+
             const receiverSocketId = users[receiverId];
             if (receiverSocketId) {
                 io.to(receiverSocketId).emit('receive_message', {
@@ -45,17 +56,25 @@ exports.socketManager = (io) => {
         socket.on('mark_read', async (data) => {
             const { messageId, senderId } = data;
             try {
-                // Notify the sender that the message was read
                 const senderSocketId = users[senderId];
                 if (senderSocketId) {
                     io.to(senderSocketId).emit('message_read', { messageId });
                 }
-                // Update database
                 if (messageId) {
-                    await Message.findByIdAndUpdate(messageId, { isRead: true });
+                    await Message.findByIdAndUpdate(messageId, { isRead: true, status: 'seen' });
                 }
             } catch (err) {
                 console.error("Mark Read Error:", err);
+            }
+        });
+
+        socket.on('delete_message', (data) => {
+            const { messageId, receiverId, type } = data;
+            if (type === 'everyone') {
+                const receiverSocketId = users[receiverId];
+                if (receiverSocketId) {
+                    io.to(receiverSocketId).emit('message_deleted', { messageId, type });
+                }
             }
         });
 

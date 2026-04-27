@@ -44,7 +44,8 @@ exports.getMessages = async (req, res) => {
             $or: [
                 { senderId: senderId, receiverId: userId },
                 { senderId: userId, receiverId: senderId }
-            ]
+            ],
+            deletedFor: { $ne: senderId }
         }).sort({ createdAt: 1 });
 
         res.json(messages);
@@ -89,6 +90,36 @@ exports.searchMessages = async (req, res) => {
         }).populate('senderId', 'name profilePic').sort({ createdAt: -1 });
 
         res.json(messages);
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+};
+
+exports.deleteMessage = async (req, res) => {
+    try {
+        const { messageId, type } = req.body; // type: 'me' or 'everyone'
+        const userId = req.user._id;
+
+        const message = await Message.findById(messageId);
+        if (!message) return res.status(404).json({ message: 'Message not found' });
+
+        if (type === 'everyone') {
+            if (message.senderId.toString() !== userId.toString()) {
+                return res.status(403).json({ message: 'Unauthorized' });
+            }
+            message.isDeleted = true;
+            message.message = 'This message was deleted';
+            message.image = null;
+            await message.save();
+        } else {
+            // Delete for me
+            if (!message.deletedFor.includes(userId)) {
+                message.deletedFor.push(userId);
+                await message.save();
+            }
+        }
+
+        res.json({ message: 'Message deleted successfully', messageId, type });
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
